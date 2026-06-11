@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeePrice - Sistem Optimalisasi Harga Fashion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #fff1f2; 
+            color: #4c0519; 
+            overflow: hidden; 
+        }
+        .font-cute { font-family: 'Quicksand', sans-serif; }
+        .sidebar { background: #ffffff; border-right: 1px solid #ffe4e6; }
+        
+        .nav-active { 
+            background: #f43f5e; 
+            color: white !important; 
+            box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.3); 
+        }
+        .page { display: none; animation: slideUp 0.4s ease; }
+        .page-active { display: block; }
+        
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .animate-fadeIn { animation: fadeIn 0.5s ease; }
+        
+        .status-badge { font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .scroll-custom::-webkit-scrollbar { width: 4px; }
+        .scroll-custom::-webkit-scrollbar-thumb { background: #fda4af; border-radius: 10px; }
+        
+        .login-overlay { background: linear-gradient(135deg, #fbcfe8 0%, #ffe4e6 50%, #f9a8d4 100%); z-index: 1000; }
+        
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .float-anim { animation: float 3s ease-in-out infinite; }
+        
+        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
+        .pulse-ring::before { content: ''; position: absolute; inset: -4px; border-radius: inherit; border: 2px solid #f43f5e; animation: pulse-ring 1.5s ease infinite; }
+        
+        @keyframes barGrow { from { width: 0; } }
+        .bar-anim { animation: barGrow 1s ease forwards; }
+        
+        .stat-card { transition: all 0.3s ease; background: #ffffff; border: 1px solid #ffe4e6; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -12px rgba(251, 113, 133, 0.15); border-color: #fca5a5; }
+        
+        input[type="range"] { -webkit-appearance: none; height: 8px; border-radius: 4px; background: #ffe4e6; outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #f43f5e; cursor: pointer; box-shadow: 0 4px 12px rgba(244,63,94,0.4); }
+        
+        .glass { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 192, 203, 0.5); }
+    </style>
+</head>
+<body class="flex h-screen font-cute">
+
+    <!-- ==================== LINGKUNGAN AUTENTIKASI ==================== -->
+    <div id="loginScreen" class="fixed inset-0 flex items-center justify-center login-overlay p-6">
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="absolute top-20 left-20 w-72 h-72 bg-white/40 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-20 right-20 w-96 h-96 bg-rose-300/30 rounded-full blur-3xl"></div>
+        </div>
+        
+        <!-- FORMULIR MASUK SISTEM -->
+        <div id="authLoginForm" class="bg-white/90 backdrop-blur-md p-10 rounded-[3rem] shadow-2xl w-full max-w-md text-center animate-fadeIn relative z-10 border border-rose-100">
+            <div class="w-20 h-20 bg-rose-50 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-xl shadow-rose-200 float-anim overflow-hidden">
+                <img src="baru logo beeprice.png" alt="BeePrice" class="w-full h-full object-contain p-2">
+            </div>
+            
+            <h2 class="text-2xl font-extrabold text-rose-900 mb-1">BeePrice</h2>
+            <p class="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-8">Keuntungan Aman</p>
+            
+            <div class="space-y-4 text-left mb-8">
+                <div class="relative">
+                    <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-rose-300 text-sm"></i>
+                    <input type="email" id="loginEmail" placeholder="Alamat Email" value="putri@digitalbusiness.unj" class="w-full pl-11 pr-4 py-4 bg-rose-50/50 border border-rose-100 rounded-2xl outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent font-semibold text-sm transition-all text-rose-900">
+                </div>
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-rose-300 text-sm"></i>
+                    <input type="password" id="loginPass" placeholder="Kata Sandi" value="••••••••" class="w-full pl-11 pr-4 py-4 bg-rose-50/50 border border-rose-100 rounded-2xl outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent font-semibold text-sm transition-all text-rose-900">
+                </div>
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked class="w-4 h-4 rounded border-rose-300 text-rose-500 focus:ring-rose-400">
+                        <span class="text-[11px] text-rose-500 font-medium">Ingat Sesi Saya</span>
+                    </label>
+                    <a href="#" class="text-[11px] text-rose-500 font-bold hover:underline">Lupa Kata Sandi?</a>
+                </div>
+            </div>
+
+            <button onclick="handleLogin()" id="loginBtn" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-rose-200 flex items-center justify-center gap-2 tracking-wide text-sm">
+                <span>MASUK KE DASHBOARD</span>
+                <i class="fas fa-arrow-right text-xs"></i>
+            </button>
+            
+            <div class="mt-6 text-xs text-rose-500 font-medium">
+                Belum memiliki akun? <button onclick="toggleAuthView('register')" class="text-rose-700 font-bold hover:underline">Daftar Sekarang</button>
+            </div>
+        </div>
+
+        <!-- FORMULIR PENDAFTARAN AKUN -->
+        <div id="authRegisterForm" class="bg-white/90 backdrop-blur-md p-10 rounded-[3rem] shadow-2xl w-full max-w-md text-center animate-fadeIn relative z-10 border border-rose-100 hidden">
+            <div class="w-16 h-16 bg-rose-50 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-md overflow-hidden">
+                <img src="baru logo beeprice.png" alt="BeePrice" class="w-full h-full object-contain p-1">
+            </div>
+            
+            <h2 class="text-xl font-extrabold text-rose-900 mb-1">Pendaftaran Akun Baru</h2>
+            <p class="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-6">Integrasikan Bisnis Fashion Anda</p>
+            
+            <div class="space-y-4 text-left mb-6">
+                <div class="relative">
+                    <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-rose-300 text-sm"></i>
+                    <input type="text" placeholder="Nama Lengkap" class="w-full pl-11 pr-4 py-3.5 bg-rose-50/50 border border-rose-100 rounded-2xl outline-none focus:ring-2 focus:ring-rose-400 font-semibold text-sm text-rose-900">
+                </div>
+                <div class="relative">
+                    <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-rose-300 text-sm"></i>
+                    <input type="email" placeholder="Alamat Email" class="w-full pl-11 pr-4 py-3.5 bg-rose-50/50 border border-rose-100 rounded-2xl outline-none focus:ring-2 focus:ring-rose-400 font-semibold text-sm text-rose-900">
+                </div>
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-rose-300 text-sm"></i>
+                    <input type="password" placeholder="Buat Kata Sandi" class="w-full pl-11 pr-4 py-3.5 bg-rose-50/50 border border-rose-100 rounded-2xl outline-none focus:ring-2 focus:ring-rose-400 font-semibold text-sm text-rose-900">
+                </div>
+            </div>
+
+            <button onclick="handleRegisterSubmit()" id="registerBtn" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-rose-200 flex items-center justify-center gap-2 tracking-wide text-sm">
+                <span>SELESAIKAN PENDAFTARAN</span>
+            </button>
+            
+            <div class="mt-4 text-xs text-rose-500 font-medium">
+                Sudah memiliki akun? <button onclick="toggleAuthView('login')" class="text-rose-700 font-bold hover:underline">Masuk</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SIDEBAR UTAMA ==================== -->
+    <aside id="mainSidebar" class="w-80 sidebar p-8 flex flex-col gap-8 sticky top-0 h-screen hidden">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 bg-rose-50/50 border border-rose-100 rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
+                <img src="baru logo beeprice.png" alt="BeePrice" class="w-full h-full object-contain p-1">
+            </div>
+            <div>
+                <h1 class="text-xl font-extrabold text-rose-500 leading-none flex items-center gap-1">
+                    BeePrice
+                </h1>
+                <p class="text-[9px] font-bold text-rose-400 mt-1 uppercase tracking-widest">Keuntungan Aman</p>
+            </div>
+        </div>
+
+        <nav id="sideNav" class="space-y-2 flex-1">
+            <div onclick="navTo('inventory', this)" class="nav-active flex items-center px-5 py-4 rounded-2xl cursor-pointer font-bold text-sm transition-all">
+                Katalog Produk
+            </div>
+            <div onclick="navTo('orders', this)" class="text-rose-400 flex items-center px-5 py-4 rounded-2xl cursor-pointer font-bold text-sm hover:bg-rose-50 transition-all">
+                Manajemen Pesanan
+            </div>
+            <div onclick="navTo('integration', this)" class="text-rose-400 flex items-center px-5 py-4 rounded-2xl cursor-pointer font-bold text-sm hover:bg-rose-50 transition-all">
+                Channel Penjualan
+            </div>
+            <div onclick="navTo('behavior', this)" class="text-rose-400 flex items-center px-5 py-4 rounded-2xl cursor-pointer font-bold text-sm hover:bg-rose-50 transition-all">
+                Tayangan Pengunjung
+            </div>
+            <div onclick="navTo('calculator', this)" class="text-rose-400 flex items-center px-5 py-4 rounded-2xl cursor-pointer font-bold text-sm hover:bg-rose-50 transition-all">
+                Kalkulator Profit
+            </div>
+            <div onclick="navTo('live', this)" class="text-rose-400 flex items-center px-5 py-4 rounded-2xl cursor-pointer font-bold text-sm hover:bg-rose-50 transition-all">
+                Live Streaming Monitor
+            </div>
+        </nav>
+
+        <div class="p-5 bg-gradient-to-br from-rose-900 to-rose-950 rounded-[2rem] text-white shadow-xl shadow-rose-900/10">
+            <p class="text-[9px] text-rose-300 font-bold uppercase mb-2 tracking-wider">Administrator Utama</p>
+            <p class="text-sm font-bold tracking-wide">Putri Dwi Farassi</p>
+            <p class="text-[10px] opacity-70">Digital Business - UNJ</p>
+            <div class="mt-4 flex items-center gap-2 text-rose-300 font-bold text-[10px]">
+                <span class="relative w-2 h-2 bg-rose-400 rounded-full pulse-ring"></span> SISTEM OPERASIONAL AKTIF
+            </div>
+        </div>
+    </aside>
+
+    <!-- ==================== ISI KONTEN DASHBOARD ==================== -->
+    <main id="mainContent" class="flex-1 overflow-y-auto p-10 scroll-custom hidden">
+
+        <!-- ========== INVENTORY PAGE ========== -->
+        <div id="inventory" class="page page-active">
+            <header class="flex flex-col lg:flex-row lg:justify-between lg:items-end mb-8 gap-4">
+                <div>
+                    <h2 class="text-4xl font-black text-rose-950 tracking-tight">Katalog Produk & Matrik Regulasi Harga</h2>
+                    <p class="text-rose-500 font-medium mt-1">Evaluasi rekomendasi harga dinamis secara real-time guna mempertahankan stabilitas margin keuntungan.</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="addProduct()" class="bg-white border-2 border-rose-100 hover:border-rose-300 text-rose-700 px-6 py-3 rounded-2xl font-bold text-xs transition flex items-center gap-2 shadow-sm">
+                        Tambah Produk Baru
+                    </button>
+                    <button onclick="bulkUpdate()" class="bg-rose-500 hover:bg-rose-600 text-white px-8 py-3 rounded-2xl font-black text-xs transition shadow-xl shadow-rose-200 flex items-center gap-2 tracking-wide">
+                        SINKRONISASI HARGA 
+                    </button>
+                </div>
+            </header>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <div class="stat-card p-6 rounded-3xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-[10px] font-black text-rose-400 uppercase tracking-widest">Total SKU Aktif</span>
+                    </div>
+                    <p class="text-3xl font-black text-rose-900" id="totalSkuCount">8</p>
+                    <p class="text-[10px] text-rose-500 font-bold mt-1">Pertumbuhan berkala kuartal ini</p>
+                </div>
+                <div class="stat-card p-6 rounded-3xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-[10px] font-black text-rose-400 uppercase tracking-widest">Ambang Batas Minimum Stok</span>
+                    </div>
+                    <p class="text-3xl font-black text-rose-600" id="lowStockCount">3</p>
+                    <p class="text-[10px] text-rose-400 font-bold mt-1">Perlu pengisian ulang inventoris</p>
+                </div>
+                <div class="stat-card p-6 rounded-3xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-[10px] font-black text-rose-400 uppercase tracking-widest">Skor Indeks Tren</span>
+                    </div>
+                    <p class="text-3xl font-black text-rose-500">89%</p>
+                    <p class="text-[10px] text-rose-400 font-bold mt-1">Tingkat relevansi tinggi terhadap pasar</p>
+                </div>
+                <div class="stat-card p-6 rounded-3xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-[10px] font-black text-rose-400 uppercase tracking-widest">Automated Engine</span>
+                    </div>
+                    <p class="text-3xl font-black text-rose-500">AKTIF</p>
+                    <p class="text-[10px] text-rose-400 font-bold mt-1">Pemantauan pergerakan kompetitor</p>
+                </div>
+            </div>
+
+            <!-- Product Table -->
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-rose-100 overflow-hidden">
+                <div class="p-6 border-b border-rose-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-rose-300 text-sm"></i>
+                            <input type="text" placeholder="Cari entitas produk..." class="pl-9 pr-4 py-2.5 bg-rose-50/50 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-rose-400 w-64 text-rose-950">
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Pembaruan otomatis terjadwal secara periodik</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left min-w-[850px]">
+                        <thead class="bg-rose-50/40 border-b border-rose-100">
+                            <tr>
+                                <th class="p-5 text-[10px] font-black text-rose-400 uppercase tracking-widest">Keterangan Produk</th>
+                                <th class="p-5 text-[10px] font-black text-rose-400 uppercase tracking-widest text-center">Harga Berjalan</th>
+                                <th class="p-5 text-[10px] font-black text-rose-400 uppercase tracking-widest text-center">Volume Stok</th>
+                                <!-- BERUBAH: Mengubah judul kolom kondisi pasar menjadi Status Penerbitan Marketplace -->
+                                <th class="p-5 text-[10px] font-black text-rose-400 uppercase tracking-widest text-center">Penerbitan Marketplace</th>
+                                <th class="p-5 text-[10px] font-black text-rose-400 uppercase tracking-widest text-right text-rose-600">Rekomendasi Harga Real-Time</th>
+                                <th class="p-5 text-[10px] font-black text-rose-400 uppercase tracking-widest text-center">Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTable" class="divide-y divide-rose-50"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ORDER MANAGEMENT PAGE ========== -->
+        <div id="orders" class="page">
+            <header class="mb-8">
+                <h2 class="text-4xl font-black text-rose-950 tracking-tight">Manajemen Pesanan</h2>
+                <p class="text-rose-500 font-medium mt-1">Daftar rekonsiliasi data transaksi penjualan yang ditarik dari seluruh saluran toko digital Anda.</p>
+            </header>
+            
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-rose-100 overflow-hidden">
+                <div class="p-6 border-b border-rose-100 flex items-center justify-between">
+                    <h3 class="font-extrabold text-rose-900 flex items-center gap-2 text-base">Database Pesanan Masuk</h3>
+                    <span class="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Sinkronisasi Real-Time</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left min-w-[900px]">
+                        <thead class="bg-rose-50/40 border-b border-rose-100">
+                            <tr>
+                                <th class="p-5 text-[10px] font-black text-rose-400 uppercase tracking-widest">No. Invoice</th>
+                                <th class="p-5 text-[10px] font-black text-rose-400 uppercase tracking-widest">Detail Pelanggan & Item</th>
+                                <th class="p-5 text-[10px] font-black text-rose-400 uppercase tracking-widest text-center">Saluran Toko</th>
+                                <th class="p-5 text-[10px] font-black text-rose-400 uppercase tracking-widest text-center">Status Sesi</th>
+                                <th class="p-5 text-[10px] font-black text-rose-400 uppercase tracking-widest text-right">Total Transaksi</th>
+                                <th class="p-5 text-[10px] font-black text-rose-400 uppercase tracking-widest text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mainOrderTable" class="divide-y divide-rose-50">
+                            <tr class="hover:bg-rose-50/30 transition text-xs text-rose-950">
+                                <td class="p-5 font-bold text-rose-900">#ORD-99214A</td>
+                                <td class="p-5">
+                                    <p class="font-extrabold text-sm text-rose-950">Budi Santoso</p>
+                                    <p class="text-[10px] text-rose-400 mt-0.5">1x Kaos Oversize Vintage - Ukuran L</p>
+                                </td>
+                                <td class="p-5 text-center font-bold text-orange-600">Shopee</td>
+                                <td class="p-5 text-center">
+                                    <span class="status-badge bg-amber-100 text-amber-700">Belum Diproses</span>
+                                </td>
+                                <td class="p-5 text-right font-black text-rose-950">Rp 89.000</td>
+                                <td class="p-5 text-center">
+                                    <button onclick="this.parentElement.parentElement.remove()" class="px-4 py-2 bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-600 rounded-xl font-bold transition text-[10px]">PROSES</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-rose-50/30 transition text-xs text-rose-950">
+                                <td class="p-5 font-bold text-rose-900">#ORD-1102B</td>
+                                <td class="p-5">
+                                    <p class="font-extrabold text-sm text-rose-950">Siti Aminah</p>
+                                    <p class="text-[10px] text-rose-400 mt-0.5">1x Tas Selempang Premium - Hitam</p>
+                                </td>
+                                <td class="p-5 text-center font-bold text-emerald-600">Tokopedia</td>
+                                <td class="p-5 text-center">
+                                    <span class="status-badge bg-blue-100 text-blue-700">Sedang Dikemas</span>
+                                </td>
+                                <td class="p-5 text-right font-black text-rose-950">Rp 145.000</td>
+                                <td class="p-5 text-center">
+                                    <button onclick="this.parentElement.parentElement.remove()" class="px-4 py-2 bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-600 rounded-xl font-bold transition text-[10px]">PROSES</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== INTEGRATION PAGE ========== -->
+        <div id="integration" class="page">
+            <header class="mb-10">
+                <h2 class="text-4xl font-black text-rose-950 tracking-tight">Integrasi Saluran Pesanan</h2>
+                <p class="text-rose-500 font-medium mt-1">Hubungkan otentikasi API saluran penjualan guna sinkronisasi pesanan masuk dan stok secara simultan.</p>
+            </header>
+
+            <div class="bg-white p-6 rounded-3xl border border-rose-100 mb-8 flex items-center justify-between shadow-sm">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 text-xl"><i class="fas fa-shield-heart"></i></div>
+                    <div>
+                        <p class="font-bold text-sm text-rose-900">Status Sinkronisasi Pesanan Terverifikasi</p>
+                        <p class="text-[10px] text-rose-400 font-medium">Sistem beroperasi normal dalam menarik data pesanan dan memperbarui resi otomatis.</p>
+                    </div>
+                </div>
+                <span class="text-rose-500 font-bold text-xs">SINKRONISASI AKTIF</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div id="shopee-card" class="stat-card p-8 rounded-[2.5rem] text-center flex flex-col items-center">
+                    <div class="w-16 h-16 bg-white border border-rose-100 rounded-2xl flex items-center justify-center mb-4 overflow-hidden p-2">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" alt="Shopee Logo" class="w-full h-full object-contain">
+                    </div>
+                    <h4 class="font-extrabold text-lg text-rose-950 mb-1">Shopee Orders</h4>
+                    <p class="text-[10px] text-rose-400 font-bold mb-6">Open Platform API v2.0</p>
+                    <button onclick="connectAPI('shopee', this)" class="w-full py-3 bg-rose-50 text-rose-600 rounded-xl text-[10px] font-black hover:bg-rose-500 hover:text-white transition tracking-wide">HUBUNGKAN PESANAN</button>
+                </div>
+                <div id="tokopedia-card" class="stat-card p-8 rounded-[2.5rem] text-center flex flex-col items-center">
+                    <div class="w-16 h-16 bg-white border border-rose-100 rounded-2xl flex items-center justify-center mb-4 overflow-hidden p-2">
+                        <img src="https://toppng.com/uploads/preview/tokopedia-logo-icon-tokopedia-115638033660bhcr3nbcq.png" alt="Tokopedia Logo" class="w-full h-full object-contain">
+                    </div>
+                    <h4 class="font-extrabold text-lg text-rose-950 mb-1">Tokopedia Orders</h4>
+                    <p class="text-[10px] text-rose-400 font-bold mb-6">Official API v3</p>
+                    <button onclick="connectAPI('tokopedia', this)" class="w-full py-3 bg-rose-50 text-rose-600 rounded-xl text-[10px] font-black hover:bg-rose-500 hover:text-white transition tracking-wide">HUBUNGKAN PESANAN</button>
+                </div>
+                <div id="tiktok-card" class="stat-card p-8 rounded-[2.5rem] text-center flex flex-col items-center">
+                    <div class="w-16 h-16 bg-white border border-rose-100 rounded-2xl flex items-center justify-center mb-4 overflow-hidden p-2">
+                        <img src="https://cloudpng.com/images/all_img/1750762123_tiktok-shop-logo-transparent-png.png" alt="TikTok Logo" class="w-full h-full object-contain scale-125">
+                    </div>
+                    <h4 class="font-extrabold text-lg text-rose-950 mb-1">TikTok Shop Orders</h4>
+                    <p class="text-[10px] text-rose-400 font-bold mb-6">Shop API v1.2</p>
+                    <button onclick="connectAPI('tiktok', this)" class="w-full py-3 bg-rose-50 text-rose-600 rounded-xl text-[10px] font-black hover:bg-rose-500 hover:text-white transition tracking-wide">HUBUNGKAN PESANAN</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== BEHAVIOR PAGE ========== -->
+        <div id="behavior" class="page">
+            <header class="mb-8">
+                <h2 class="text-4xl font-black text-rose-950 tracking-tight">Analisis Trafik & Retensi Pengunjung</h2>
+                <p class="text-rose-500 font-medium mt-1">Identifikasi preferensi pola perilaku konsumen sepanjang siklus proses transaksi.</p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-8 rounded-[2.5rem] border border-rose-100 col-span-1">
+                    <h3 class="font-extrabold mb-6 flex items-center text-rose-900">Alur Konversi Transaksi</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs font-bold mb-1"><span>Tayangan Halaman Produk</span><span class="text-rose-400">2,847</span></div>
+                            <div class="w-full h-8 bg-rose-50 rounded-xl overflow-hidden"><div class="h-full bg-rose-400 rounded-xl bar-anim flex items-center justify-center text-[10px] text-white font-bold" style="width:100%">100%</div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-bold mb-1"><span>Retensi Keranjang Belanja</span><span class="text-rose-400">892</span></div>
+                            <div class="w-full h-8 bg-rose-50 rounded-xl overflow-hidden"><div class="h-full bg-rose-300 rounded-xl bar-anim flex items-center justify-center text-[10px] text-white font-bold" style="width:31%">31%</div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-bold mb-1"><span>Penyelesaian Pembayaran</span><span class="text-rose-400">137</span></div>
+                            <div class="w-full h-8 bg-rose-50 rounded-xl overflow-hidden"><div class="h-full bg-rose-500 rounded-xl bar-anim flex items-center justify-center text-[10px] text-white font-bold" style="width:15%">4.8%</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-[2.5rem] border border-rose-100 col-span-2">
+                    <h3 class="font-extrabold mb-6 flex items-center text-rose-900">Peringkat Komoditas Berdasarkan Volume Interaksi</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="p-4 bg-rose-50/50 rounded-2xl text-center border border-rose-100">
+                            <p class="font-bold text-xs text-rose-900">Blouse Sutra Ruffle</p>
+                            <p class="text-[10px] text-rose-400 mt-1">847 Kunjungan</p>
+                        </div>
+                        <div class="p-4 bg-rose-50/50 rounded-2xl text-center border border-rose-100">
+                            <p class="font-bold text-xs text-rose-900">Tas Selebon Premium</p>
+                            <p class="text-[10px] text-rose-400 mt-1">623 Kunjungan</p>
+                        </div>
+                        <div class="p-4 bg-rose-50/50 rounded-2xl text-center border border-rose-100">
+                            <p class="font-bold text-xs text-rose-900">Kaos Oversize Vintage</p>
+                            <p class="text-[10px] text-rose-400 mt-1">512 Kunjungan</p>
+                        </div>
+                        <div class="p-4 bg-rose-50/50 rounded-2xl text-center border border-rose-100">
+                            <p class="font-bold text-xs text-rose-900">Cardigan Knit Pastel</p>
+                            <p class="text-[10px] text-rose-400 mt-1">489 Kunjungan</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== CALCULATOR PAGE ========== -->
+        <div id="calculator" class="page">
+            <header class="mb-8">
+                <h2 class="text-4xl font-black text-rose-950 tracking-tight">Kalkulator Akuntansi Profitabilitas</h2>
+                <p class="text-rose-500 font-medium mt-1">Analisis estimasi keuntungan bersih komparatif pasca kalkulasi potongan biaya komisi platform marketplace.</p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-[2.5rem] border border-rose-100">
+                    <h3 class="font-extrabold mb-6 flex items-center text-rose-900">Struktur Komponen Finansial</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs font-bold text-rose-500 mb-2 block">Harga Jual Satuan (Rp)</label>
+                            <input type="number" id="calcPrice" value="149000" oninput="calculateProfit()" class="w-full p-4 bg-rose-50 border border-rose-100 rounded-2xl outline-none font-bold text-lg text-rose-900">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-rose-500 mb-2 block">Harga Pokok Penjualan / HPP (Rp)</label>
+                            <input type="number" id="calcCost" value="55000" oninput="calculateProfit()" class="w-full p-4 bg-rose-50 border border-rose-100 rounded-2xl outline-none font-bold text-lg text-rose-900">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-rose-500 mb-2 block">Persentase Tarif Komisi Administrasi: <span id="feeLabel" class="text-rose-600">5%</span></label>
+                            <input type="range" id="calcFee" min="1" max="15" value="5" oninput="calculateProfit()" class="w-full">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-rose-500 mb-2 block">Alokasi Logistik & Pengemasan Eksklusif (Rp)</label>
+                            <input type="number" id="calcShipping" value="9000" oninput="calculateProfit()" class="w-full p-4 bg-rose-50 border border-rose-100 rounded-2xl outline-none font-bold text-lg text-rose-900">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-rose-500 mb-2 block">Volume Proyeksi Penjualan (Bulanan)</label>
+                            <input type="number" id="calcQty" value="150" oninput="calculateProfit()" class="w-full p-4 bg-rose-50 border border-rose-100 rounded-2xl outline-none font-bold text-lg text-rose-900">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-gradient-to-br from-rose-500 to-pink-600 p-8 rounded-[2.5rem] text-white shadow-xl shadow-rose-200">
+                        <p class="text-[10px] font-black uppercase tracking-widest opacity-75 mb-2">Refleksi Laba Bersih Konsolidasi</p>
+                        <p id="profitResult" class="text-4xl font-black">Rp 0</p>
+                        <div class="mt-4 flex gap-4">
+                            <div class="flex-1 bg-white/20 rounded-xl p-3 text-center">
+                                <p class="text-[9px] font-bold uppercase opacity-75">Margin Keuntungan</p>
+                                <p id="marginResult" class="text-lg font-black">0%</p>
+                            </div>
+                            <div class="flex-1 bg-white/20 rounded-xl p-3 text-center">
+                                <p class="text-[9px] font-bold uppercase opacity-75">Laba per Unit</p>
+                                <p id="unitResult" class="text-lg font-black">Rp 0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-rose-50 border border-rose-200 p-6 rounded-2xl flex gap-4">
+                        <div class="w-10 h-10 bg-rose-200 rounded-xl flex items-center justify-center text-rose-700 shrink-0"><i class="fas fa-lightbulb"></i></div>
+                        <div>
+                            <p class="font-bold text-sm text-rose-800">Rekomendasi Skema Harga</p>
+                            <p id="aiInsight" class="text-xs text-rose-700 mt-1">Harap input metrik finansial untuk kalkulasi laporan...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== LIVE STREAM ROOM ========== -->
+        <div id="live" class="page">
+            <header class="mb-8">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+                    <div>
+                        <h2 class="text-4xl font-black text-rose-950 tracking-tight flex items-center gap-3">
+                            Panel Monitor Live Stream
+                            <span class="inline-flex items-center gap-1.5 bg-rose-100 text-rose-600 px-3 py-1 rounded-full text-xs font-black animate-pulse">
+                                <span class="w-2 h-2 bg-rose-500 rounded-full"></span> TRANSMISI BERJALAN
+                            </span>
+                        </h2>
+                        <p class="text-rose-500 font-medium mt-1">Pemantauan metrik penjualan, log retensi keranjang belanja, serta alur pesanan masuk secara langsung.</p>
+                    </div>
+                    <button onclick="toggleLive()" id="liveToggle" class="bg-rose-500 hover:bg-rose-600 text-white px-8 py-3 rounded-2xl font-black text-xs transition shadow-xl shadow-rose-200 flex items-center gap-2">
+                        INISIASI TRANSMISI SIARAN
+                    </button>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                <div class="stat-card p-5 rounded-2xl text-center">
+                    <p class="text-[9px] font-black text-rose-400 uppercase tracking-widest">Penonton Simultan</p>
+                    <p id="liveViewers" class="text-2xl font-black text-rose-900 mt-1">0</p>
+                </div>
+                <div class="stat-card p-5 rounded-2xl text-center">
+                    <p class="text-[9px] font-black text-rose-400 uppercase tracking-widest">Interaksi Etalase</p>
+                    <p id="liveCart" class="text-2xl font-black text-rose-600 mt-1">0</p>
+                </div>
+                <div class="stat-card p-5 rounded-2xl text-center">
+                    <p class="text-[9px] font-black text-rose-400 uppercase tracking-widest">Volume Transaksi Sukses</p>
+                    <p id="liveOrders" class="text-2xl font-black text-emerald-600 mt-1">0</p>
+                </div>
+                <div class="stat-card p-5 rounded-2xl text-center">
+                    <p class="text-[9px] font-black text-rose-400 uppercase tracking-widest">Akumulasi Omzet Sesi</p>
+                    <p id="liveRevenue" class="text-xl font-black text-rose-600 mt-1">Rp 0</p>
+                </div>
+                <div class="stat-card p-5 rounded-2xl text-center">
+                    <p class="text-[9px] font-black text-rose-400 uppercase tracking-widest">Rasio Konversi Transaksi</p>
+                    <p id="liveConv" class="text-2xl font-black text-amber-600 mt-1">0%</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-[2.5rem] border border-rose-100 lg:col-span-2">
+                    <h3 class="font-extrabold mb-4 text-rose-900 flex items-center gap-2">Log Komunikasi Transmisi</h3>
+                    <div id="liveFeed" class="space-y-2 max-h-60 overflow-y-auto scroll-custom">
+                        <div class="p-4 bg-rose-50/50 rounded-xl text-center text-xs text-rose-400 font-medium border border-rose-100">
+                            Silakan fungsikan tombol kendali di atas untuk memulai simulasi data transaksi real-time.
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-[2.5rem] border border-rose-100">
+                    <h3 class="font-extrabold mb-4 text-rose-900 flex items-center gap-2">Komoditas Penjualan Tertinggi</h3>
+                    <div id="liveProducts" class="space-y-3">
+                        <div class="p-3 bg-rose-50/30 border border-rose-100 rounded-xl flex justify-between items-center text-xs">
+                            <div>
+                                <p class="font-bold text-rose-950">Blouse Sutra Ruffle</p>
+                                <p class="text-[10px] text-rose-400" id="lp-serum">0 Unit Terjual</p>
+                            </div>
+                            <span class="font-extrabold text-rose-600" id="lp-serum-rev">Rp 0</span>
+                        </div>
+                        <div class="p-3 bg-rose-50/30 border border-rose-100 rounded-xl flex justify-between items-center text-xs">
+                            <div>
+                                <p class="font-bold text-rose-950">Tas Selebon Premium</p>
+                                <p class="text-[10px] text-rose-400" id="lp-tas">0 Unit Terjual</p>
+                            </div>
+                            <span class="font-extrabold text-rose-600" id="lp-tas-rev">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ==================== ADD PRODUCT MODAL ==================== -->
+    <div id="addProductModal" class="fixed inset-0 bg-rose-900/30 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6 overflow-y-auto">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-2xl animate-fadeIn border border-rose-100 shadow-2xl my-auto">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-plus-circle text-rose-500 text-lg"></i>
+                    <h3 class="font-extrabold text-xl text-rose-900">Registrasi Komoditas Baru</h3>
+                </div>
+                <button onclick="closeModal()" class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500 hover:bg-rose-100 transition"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4 text-xs">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="font-bold text-rose-500 mb-1 block">Nama Artikel Produk</label>
+                        <input type="text" id="newName" placeholder="Contoh: Dress Satin Sweetheart" class="w-full p-3 bg-rose-50/50 border border-rose-100 rounded-xl outline-none focus:ring-2 focus:ring-rose-400 font-semibold text-rose-950">
+                    </div>
+                    <div>
+                        <label class="font-bold text-rose-500 mb-1 block">Klasifikasi Kategori</label>
+                        <select id="newCat" class="w-full p-3 bg-rose-50/50 border border-rose-100 rounded-xl outline-none focus:ring-2 focus:ring-rose-400 font-semibold text-rose-950">
+                            <option>Premium Dress</option><option>Bag Bags</option><option>Tops Outer</option><option>Hijab Pastel</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="font-bold text-rose-500 mb-1 block">Deskripsi Lengkap Produk</label>
+                    <textarea id="newDesc" rows="3" placeholder="Masukkan spesifikasi produk, bahan, detail ukuran, dan petunjuk perawatan..." class="w-full p-3 bg-rose-50/50 border border-rose-100 rounded-xl outline-none focus:ring-2 focus:ring-rose-400 font-semibold text-rose-950 resize-none"></textarea>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div>
+                        <label class="font-bold text-rose-500 mb-1 block">Kode SKU</label>
+                        <input type="text" id="newSku" placeholder="DR-009" class="w-full p-3 bg-rose-50/50 border border-rose-100 rounded-xl outline-none focus:ring-2 focus:ring-rose-400 font-semibold text-rose-950">
+                    </div>
+                    <div>
+                        <label class="font-bold text-rose-500 mb-1 block">Harga Jual (Rp)</label>
+                        <input type="number" id="newPrice" placeholder="125000" class="w-full p-3 bg-rose-50/50 border border-rose-100 rounded-xl outline-none focus:ring-2 focus:ring-rose-400 font-semibold text-rose-950">
+                    </div>
+                    <div>
+                        <label class="font-bold text-rose-500 mb-1 block">Kapasitas Stok</label>
+                        <input type="number" id="newStock" placeholder="30" class="w-full p-3 bg-rose-50/50 border border-rose-100 rounded-xl outline-none focus:ring-2 focus:ring-rose-400 font-semibold text-rose-950">
+                    </div>
+                    <div>
+                        <label class="font-bold text-rose-500 mb-1 block">Nilai HPP (Rp)</label>
+                        <input type="number" id="newModal" placeholder="45000" class="w-full p-3 bg-rose-50/50 border border-rose-100 rounded-xl outline-none focus:ring-2 focus:ring-rose-400 font-semibold text-rose-950">
+                    </div>
+                </div>
+                <div>
+                    <label class="font-bold text-rose-500 mb-2 block">Pilihan Jasa Kirim Didukung (Logistik)</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-rose-50/40 p-4 rounded-2xl border border-rose-100">
+                        <label class="flex items-center gap-2 cursor-pointer font-semibold text-rose-900">
+                            <input type="checkbox" id="addShipRegular" checked class="w-4 h-4 rounded border-rose-300 text-rose-500 focus:ring-rose-400"> Regular (J&T, JNE)
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer font-semibold text-rose-900">
+                            <input type="checkbox" id="addShipCargo" checked class="w-4 h-4 rounded border-rose-300 text-rose-500 focus:ring-rose-400"> Kargo (Sicepat)
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer font-semibold text-rose-900">
+                            <input type="checkbox" id="addShipInstant" class="w-4 h-4 rounded border-rose-300 text-rose-500 focus:ring-rose-400"> Instant (Gojek)
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer font-semibold text-rose-900">
+                            <input type="checkbox" id="addShipSameday" class="w-4 h-4 rounded border-rose-300 text-rose-500 focus:ring-rose-400"> Same Day (Grab)
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <button onclick="saveProduct()" class="w-full mt-6 bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-rose-100 flex items-center justify-center gap-2">
+                SIMPAN KE DATA KATALOG
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== EDIT PRODUCT MODAL ==================== -->
+    <div id="editProductModal" class="fixed inset-0 bg-rose-900/30 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6 overflow-y-auto">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-2xl animate-fadeIn border border-rose-100 shadow-2xl my-auto">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-edit text-rose-500 text-lg"></i>
+                    <h3 class="font-extrabold text-xl text-rose-900">Edit Konten & Integrasi Marketplace</h3>
+                </div>
+                <button onclick="closeEditModal()" class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500 hover:bg-rose-100 transition"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <input type="hidden" id="editProductIndex">
+            
+            <div class="space-y-5 text-xs">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="font-bold text-rose-500 mb-1 block">Judul Artikel Produk</label>
+                        <input type="text" id="editName" class="w-full p-3 bg-rose-50/50 border border-rose-100 rounded-xl outline-none focus:ring-2 focus:ring-rose-400 font-semibold text-rose-950">
+                    </div>
+                    <div>
+                        <label class="font-bold text-rose-500 mb-1 block">Klasifikasi Kategori</label>
+                        <select id="editCat" class="w-full p-3 bg-rose-50/50 border border-rose-100 rounded-xl outline-none focus:ring-2 focus:ring-rose-400 font-semibold text-rose-950">
+                            <option>Premium Dress</option><option>Bag Bags</option><option>Tops Outer</option><option>Hijab Pastel</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="font-bold text-rose-500 mb-1 block">Deskripsi Lengkap Produk</label>
+                    <textarea id="editDesc" rows="3" placeholder="Masukkan spesifikasi produk, bahan, detail ukuran, dan petunjuk perawatan..." class="w-full p-3 bg-rose-50/50 border border-rose-100 rounded-xl outline-none focus:ring-2 focus:ring-rose-400 font-semibold text-rose-950 resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="font-bold text-rose-500 mb-2 block">Pilihan Jasa Kirim Didukung (Logistik)</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-rose-50/40 p-4 rounded-2xl border border-rose-100">
+                        <label class="flex items-center gap-2 cursor-pointer font-semibold text-rose-900">
+                            <input type="checkbox" id="shipRegular" checked class="w-4 h-4 rounded border-rose-300 text-rose-500 focus:ring-rose-400"> Regular (J&T, JNE)
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer font-semibold text-rose-900">
+                            <input type="checkbox" id="shipCargo" checked class="w-4 h-4 rounded border-rose-300 text-rose-500 focus:ring-rose-400"> Kargo (Sicepat)
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer font-semibold text-rose-900">
+                            <input type="checkbox" id="shipInstant" class="w-4 h-4 rounded border-rose-300 text-rose-500 focus:ring-rose-400"> Instant (Gojek)
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer font-semibold text-rose-900">
+                            <input type="checkbox" id="shipSameday" class="w-4 h-4 rounded border-rose-300 text-rose-500 focus:ring-rose-400"> Same Day (Grab)
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <label class="font-bold text-rose-500 mb-2 block">Penerbitan Konten & Integrasi Marketplace Instan</label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <button onclick="pushToMarketplace('Shopee')" class="py-3 px-4 bg-orange-50 border border-orange-200 hover:bg-orange-500 hover:text-white text-orange-700 font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
+                            <i class="fab fa-shopee text-base"></i> PUSH TO SHOPEE
+                        </button>
+                        <button onclick="pushToMarketplace('Tokopedia')" class="py-3 px-4 bg-emerald-50 border border-emerald-200 hover:bg-emerald-500 hover:text-white text-emerald-700 font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
+                            <i class="fas fa-shopping-bag text-base"></i> PUSH TO TOKOPEDIA
+                        </button>
+                        <button onclick="pushToMarketplace('TikTok Shop')" class="py-3 px-4 bg-purple-50 border border-purple-200 hover:bg-purple-500 hover:text-white text-purple-700 font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
+                            <i class="fab fa-tiktok text-base"></i> PUSH TO TIKTOK SHOP
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mt-6">
+                <button onclick="closeEditModal()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold py-3.5 rounded-2xl transition">
+                    BATALKAN
+                </button>
+                <button onclick="saveEditedProduct()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-2xl transition shadow-xl shadow-rose-200">
+                    PERBARUI DATA KATALOG
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TOAST NOTIF ==================== -->
+    <div id="bulkToast" class="fixed bottom-10 right-10 bg-rose-950 text-white px-10 py-5 rounded-3xl shadow-2xl border-2 border-rose-400 hidden flex items-center gap-4 z-50 animate-fadeIn">
+        <i class="fas fa-circle-check text-rose-400 text-2xl"></i>
+        <div>
+            <p class="text-sm font-black">SINKRONISASI BERHASIL!</p>
+            <p class="text-[10px] text-rose-300 font-bold tracking-wide italic">Nilai penyesuaian pasar eksternal telah diaplikasikan.</p>
+        </div>
+    </div>
+
+    <!-- ==================== CORE JAVASCRIPT ARCHITECTURE ==================== -->
+    <script>
+        // BERUBAH BARU: Menambahkan status awal integrasi masing-masing marketplace (shopee, tokopedia, tiktok)
+        const products = [
+            { name: "Blouse Sutra Ruffle Pastel", sku: "BL-001", cat: "Tops Outer", price: 89500, stock: 12, modal: 35000, viewFrequency: 840, baseSuggestion: 95000, sync: true, desc: "Blouse sutra premium lembut dengan aksen ruffle elegan di bagian dada.", shopee: true, tokopedia: true, tiktok: false },
+            { name: "Tas Selebon Premium Chic", sku: "BG-002", cat: "Bag Bags", price: 149000, stock: 45, modal: 55000, viewFrequency: 310, baseSuggestion: 139000, sync: true, desc: "Tas selempang wanita dengan bahan kulit sintetis premium tebal.", shopee: true, tokopedia: false, tiktok: true },
+            { name: "Cardigan Oversize Vintage Pink", sku: "CD-003", cat: "Tops Outer", price: 110000, stock: 8, modal: 45000, viewFrequency: 990, baseSuggestion: 125000, sync: true, desc: "Cardigan rajut rajutan tebal bertekstur retro vintage bergaya Korea.", shopee: false, tokopedia: true, tiktok: true },
+            { name: "Dress Satin Sweetheart", sku: "DR-004", cat: "Premium Dress", price: 245000, stock: 4, modal: 110000, viewFrequency: 1205, baseSuggestion: 265000, sync: true, desc: "Dress satin silk premium berkilau mewah dengan potongan leher sweetheart.", shopee: true, tokopedia: true, tiktok: true },
+            { name: "Rok Plisket A-Line Soft", sku: "RK-005", cat: "Tops Outer", price: 75000, stock: 35, modal: 25000, viewFrequency: 150, baseSuggestion: 75000, sync: false, desc: "Rok plisket payung klok lebar jatuh dari bahan hyget super tebal.", shopee: false, tokopedia: false, tiktok: false },
+            { name: "Kemeja Linen Linen Cozy", sku: "KM-006", cat: "Tops Outer", price: 95000, stock: 19, modal: 38000, viewFrequency: 450, baseSuggestion: 99000, sync: true, desc: "Kemeja basic kasual berbahan linen rami murni adem menyerap keringat.", shopee: true, tokopedia: false, tiktok: false },
+            { name: "Hijab Voal Ultra Fine Pink", sku: "HJ-007", cat: "Hijab Pastel", price: 45000, stock: 120, modal: 15000, viewFrequency: 85, baseSuggestion: 42000, sync: true, desc: "Hijab voal ultra fine berukuran 115x115 cm dengan tepian laser cut rapi.", shopee: true, tokopedia: true, tiktok: false },
+            { name: "Flatshoes Ribbon Ballet", sku: "SH-008", cat: "Bag Bags", price: 135000, stock: 3, modal: 60000, viewFrequency: 610, baseSuggestion: 149000, sync: false, desc: "Sepatu flat model balerina berhias pita cantik di bagian depan.", shopee: false, tokopedia: false, tiktok: false }
+        ];
+
+        function calculateDynamicPricingRealTime() {
+            products.forEach(p => {
+                let multiplier = 1.0;
+                if (p.stock <= 10) multiplier += 0.12; 
+                if (p.viewFrequency > 500) multiplier += 0.06;
+                if (p.stock > 50) multiplier -= 0.08;
+                p.suggestion = Math.round((p.price * multiplier) / 500) * 500;
+            });
+            renderProducts();
+            updateStatsCounters();
+        }
+
+        setInterval(() => {
+            products.forEach(p => {
+                p.viewFrequency += Math.floor(Math.random() * 25) - 10;
+                if (p.viewFrequency < 0) p.viewFrequency = 10;
+            });
+            calculateDynamicPricingRealTime();
+            
+            const mainOrderTable = document.getElementById('mainOrderTable');
+            if (mainOrderTable) {
+                const platforms = [
+                    { name: 'Shopee', color: 'text-orange-600' },
+                    { name: 'Tokopedia', color: 'text-emerald-600' },
+                    { name: 'TikTok Shop', color: 'text-purple-600' }
+                ];
+                const buyers = ['Andi Wijaya', 'Dewi Lestari', 'Rian Hidayat', 'Farhan Saputra', 'Amalia Putri', 'Putra Siregar'];
+                const statuses = [
+                    { label: 'Belum Diproses', style: 'bg-amber-100 text-amber-700' },
+                    { label: 'Sedang Dikemas', style: 'bg-blue-100 text-blue-700' },
+                    { label: 'Dalam Pengiriman', style: 'bg-indigo-100 text-indigo-700' }
+                ];
+                
+                const selectedProduct = products[Math.floor(Math.random() * products.length)];
+                const platform = platforms[Math.floor(Math.random() * platforms.length)];
+                const buyer = buyers[Math.floor(Math.random() * buyers.length)];
+                const status = statuses[Math.floor(Math.random() * statuses.length)];
+                const randomId = Math.floor(10000 + Math.random() * 90000);
+
+                const trRow = document.createElement('tr');
+                trRow.className = 'hover:bg-rose-50/30 transition text-xs text-rose-950 animate-fadeIn';
+                trRow.innerHTML = `
+                    <td class="p-5 font-bold text-rose-900">#ORD-${randomId}A</td>
+                    <td class="p-5">
+                        <p class="font-extrabold text-sm text-rose-950">${buyer}</p>
+                        <p class="text-[10px] text-rose-400 mt-0.5">1x ${selectedProduct.name}</p>
+                    </td>
+                    <td class="p-5 text-center font-bold ${platform.color}">${platform.name}</td>
+                    <td class="p-5 text-center">
+                        <span class="status-badge ${status.style}">${status.label}</span>
+                    </td>
+                    <td class="p-5 text-right font-black text-rose-950">Rp ${selectedProduct.price.toLocaleString('id')}</td>
+                    <td class="p-5 text-center">
+                        <button onclick="this.parentElement.parentElement.remove()" class="px-4 py-2 bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-600 rounded-xl font-bold transition text-[10px]">PROSES</button>
+                    </td>
+                `;
+                mainOrderTable.insertBefore(trRow, mainOrderTable.firstChild);
+                if (mainOrderTable.children.length > 8) mainOrderTable.removeChild(mainOrderTable.lastChild);
+            }
+        }, 4000);
+
+        // BERUBAH BARU: Menampilkan indikator ikon visual status sinkronisasi penerbitan 3 marketplace utama
+        function renderProducts() {
+            const tbody = document.getElementById('productTable');
+            if (!tbody) return;
+            tbody.innerHTML = products.map((p, i) => {
+                const stockColor = p.stock <= 10 ? 'text-rose-600 bg-rose-50' : 'text-emerald-600 bg-emerald-50';
+                const priceDiff = p.suggestion - p.price;
+                const diffLabel = priceDiff > 0 ? `▲ Naik Rp ${priceDiff.toLocaleString('id')}` : priceDiff < 0 ? `▼ Turun Rp ${Math.abs(priceDiff).toLocaleString('id')}` : 'Konstan';
+                const diffColor = priceDiff > 0 ? 'text-emerald-600 font-bold' : priceDiff < 0 ? 'text-rose-500 font-bold' : 'text-rose-300';
+                
+                // Set warna badge status marketplace berdasarkan boolean penerbitan
+                const shopeeIcon = p.shopee ? 'text-orange-500 border-orange-200 bg-orange-50' : 'text-gray-300 border-gray-100 bg-gray-50';
+                const tokpedIcon = p.tokopedia ? 'text-emerald-500 border-emerald-200 bg-emerald-50' : 'text-gray-300 border-gray-100 bg-gray-50';
+                const tiktokIcon = p.tiktok ? 'text-purple-600 border-purple-200 bg-purple-50' : 'text-gray-300 border-gray-100 bg-gray-50';
+
+                return `
+                <tr class="hover:bg-rose-50/30 transition group text-xs text-rose-950">
+                    <td class="p-5">
+                        <p class="font-extrabold text-sm">${p.name}</p>
+                        <p class="text-[10px] text-rose-400 font-medium">SKU: ${p.sku} | <span class="bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded">${p.cat}</span></p>
+                    </td>
+                    <td class="p-5 text-center font-bold">Rp ${p.price.toLocaleString('id')}</td>
+                    <td class="p-5 text-center">
+                        <span class="px-2.5 py-1 rounded-full ${stockColor} font-bold">${p.stock} Unit</span>
+                    </td>
+                    <td class="p-5 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <span class="w-7 h-7 rounded-lg border flex items-center justify-center text-xs ${shopeeIcon}" title="Shopee"><i class="fab fa-shopee"></i></span>
+                            <span class="w-7 h-7 rounded-lg border flex items-center justify-center text-xs ${tokpedIcon}" title="Tokopedia"><i class="fas fa-shopping-bag"></i></span>
+                            <span class="w-7 h-7 rounded-lg border flex items-center justify-center text-xs ${tiktokIcon}" title="TikTok Shop"><i class="fab fa-tiktok"></i></span>
+                        </div>
+                    </td>
+                    <td class="p-5 text-right bg-rose-50/20">
+                        <p class="font-black text-rose-600 text-sm">Rp ${p.suggestion.toLocaleString('id')}</p>
+                        <p class="text-[9px] ${diffColor}">${diffLabel}</p>
+                    </td>
+                    <td class="p-5 text-center">
+                        <div class="flex items-center justify-center gap-2 opacity-80 group-hover:opacity-100">
+                            <button onclick="openEditModal(${i})" class="w-8 h-8 bg-rose-150 text-rose-600 rounded-lg flex items-center justify-center bg-rose-50 hover:bg-rose-500 hover:text-white transition text-xs" title="Edit Detail Konten & Integrasi"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteProduct(${i})" class="w-8 h-8 bg-rose-400 text-white rounded-lg flex items-center justify-center hover:bg-rose-600 transition text-xs"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function openEditModal(index) {
+            const p = products[index];
+            document.getElementById('editProductIndex').value = index;
+            document.getElementById('editName').value = p.name;
+            document.getElementById('editCat').value = p.cat;
+            document.getElementById('editDesc').value = p.desc || '';
+            
+            document.getElementById('shipRegular').checked = true;
+            document.getElementById('shipCargo').checked = true;
+            document.getElementById('editProductModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editProductModal').classList.add('hidden');
+        }
+
+        function saveEditedProduct() {
+            const index = document.getElementById('editProductIndex').value;
+            if (index === '') return;
+
+            products[index].name = document.getElementById('editName').value.trim();
+            products[index].cat = document.getElementById('editCat').value;
+            products[index].desc = document.getElementById('editDesc').value.trim();
+
+            calculateDynamicPricingRealTime();
+            closeEditModal();
+            showToast('Katalog Diperbarui!', 'Perubahan judul, kategori, deskripsi, dan logistik berhasil disimpan.');
+        }
+
+        // BERUBAH BARU: Fungsi merubah state boolean status integrasi produk ke marketplace secara aktif
+        function pushToMarketplace(marketplaceName) {
+            const index = document.getElementById('editProductIndex').value;
+            if (index === '') return;
+            
+            const productName = products[index].name;
+            
+            if (marketplaceName === 'Shopee') products[index].shopee = true;
+            if (marketplaceName === 'Tokopedia') products[index].tokopedia = true;
+            if (marketplaceName === 'TikTok Shop') products[index].tiktok = true;
+
+            calculateDynamicPricingRealTime(); // Render ulang tabel agar status ikon ikut berubah
+            showToast('Penerbitan Sukses!', `"${productName}" berhasil di-upload dan sinkron ke ${marketplaceName}.`);
+        }
+
+        function updateStatsCounters() {
+            const lowStock = products.filter(p => p.stock <= 10).length;
+            if(document.getElementById('totalSkuCount')) document.getElementById('totalSkuCount').textContent = products.length;
+            if(document.getElementById('lowStockCount')) document.getElementById('lowStockCount').textContent = lowStock;
+        }
+
+        function applySuggestion(idx) {
+            const p = products[idx];
+            p.price = p.suggestion;
+            calculateDynamicPricingRealTime();
+            showToast('Konformasi Harga Berhasil!', `${p.name} disesuaikan ke nominal Rp ${p.price.toLocaleString('id')}`);
+        }
+
+        function deleteProduct(idx) {
+            const n = products[idx].name;
+            products.splice(idx, 1);
+            calculateDynamicPricingRealTime();
+            showToast('Data Entitas Terhapus', `${n} berhasil dikeluarkan dari basis data.`);
+        }
+
+        function addProduct() { document.getElementById('addProductModal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('addProductModal').classList.add('hidden'); }
+
+        function saveProduct() {
+            const name = document.getElementById('newName').value.trim();
+            const sku = document.getElementById('newSku').value.trim();
+            const cat = document.getElementById('newCat').value;
+            const desc = document.getElementById('newDesc').value.trim() || 'Tidak ada deskripsi.';
+            const price = parseInt(document.getElementById('newPrice').value) || 0;
+            const stock = parseInt(document.getElementById('newStock').value) || 0;
+            const modal = parseInt(document.getElementById('newModal').value) || 0;
+            
+            if (!name || !sku || !price) { alert('Harap lengkapi parameter entitas produk terlebih dahulu.'); return; }
+            
+            // Produk baru diset draft (false) di awal agar bisa di-push manual lewat tombol edit tindakan
+            products.push({ 
+                name, sku, cat, price, stock, modal, 
+                viewFrequency: 150, baseSuggestion: price, sync: false, desc: desc,
+                shopee: false, tokopedia: false, tiktok: false 
+            });
+            
+            calculateDynamicPricingRealTime();
+            closeModal();
+            showToast('Registrasi Entitas Sukses!', `${name} telah tersimpan ke dalam katalog.`);
+            ['newName','newSku','newPrice','newStock','newModal', 'newDesc'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        function bulkUpdate() {
+            products.forEach(p => { p.price = p.suggestion; });
+            calculateDynamicPricingRealTime();
+            const toast = document.getElementById('bulkToast');
+            if(toast) {
+                toast.classList.remove('hidden');
+                setTimeout(() => toast.classList.add('hidden'), 4000);
+            }
+        }
+
+        function showToast(title, msg) {
+            const toast = document.getElementById('bulkToast');
+            if(!toast) return;
+            toast.innerHTML = `<i class="fas fa-circle-check text-rose-400 text-2xl"></i><div><p class="text-sm font-black">${title}</p><p class="text-[10px] text-rose-200 font-bold">${msg}</p></div>`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3500);
+        }
+
+        function handleLogin() {
+            const btn = document.getElementById('loginBtn');
+            btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Memvalidasi Kredensial Sesi...';
+            setTimeout(() => {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainSidebar').classList.remove('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                calculateDynamicPricingRealTime();
+                calculateProfit();
+            }, 1200);
+        }
+
+        function toggleAuthView(view) {
+            if (view === 'register') {
+                document.getElementById('authLoginForm').classList.add('hidden');
+                document.getElementById('authRegisterForm').classList.remove('hidden');
+            } else {
+                document.getElementById('authRegisterForm').classList.add('hidden');
+                document.getElementById('authLoginForm').classList.remove('hidden');
+            }
+        }
+
+        function handleRegisterSubmit() {
+            const btn = document.getElementById('registerBtn');
+            btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Memproses Pendaftaran...';
+            setTimeout(() => {
+                alert('Registrasi akun berhasil dilakukan. Silakan masuk menggunakan akun Anda.');
+                toggleAuthView('login');
+                btn.innerHTML = '<span>SELESAIKAN PENDAFTARAN</span>';
+            }, 1500);
+        }
+
+        function navTo(id, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('page-active'));
+            const targetPage = document.getElementById(id);
+            if (targetPage) targetPage.classList.add('page-active');
+            
+            document.querySelectorAll('#sideNav div').forEach(d => {
+                d.classList.remove('nav-active');
+                d.classList.add('text-rose-400');
+            });
+            btn.classList.add('nav-active');
+            btn.classList.remove('text-rose-400');
+        }
+
+        function connectAPI(platform, btn) {
+            btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> MENYAMBUNGKAN...';
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i> OTENTIKASI API BERHASIL';
+                btn.className = "w-full py-3 bg-rose-500 text-white rounded-xl text-[10px] font-black cursor-default";
+            }, 1500);
+        }
+
+        function calculateProfit() {
+            const price = parseFloat(document.getElementById('calcPrice').value) || 0;
+            const cost = parseFloat(document.getElementById('calcCost').value) || 0;
+            const feePct = parseFloat(document.getElementById('calcFee').value) || 0;
+            const shipping = parseFloat(document.getElementById('calcShipping').value) || 0;
+            const qty = parseFloat(document.getElementById('calcQty').value) || 0;
+
+            if(document.getElementById('feeLabel')) document.getElementById('feeLabel').textContent = feePct + '%';
+
+            const fee = price * (feePct / 100);
+            const profitPerUnit = price - cost - fee - shipping;
+            const totalProfit = profitPerUnit * qty;
+            const margin = price > 0 ? (profitPerUnit / price * 100) : 0;
+
+            if(document.getElementById('profitResult')) document.getElementById('profitResult').textContent = `Rp ${totalProfit.toLocaleString('id')}`;
+            if(document.getElementById('marginResult')) document.getElementById('marginResult').textContent = margin.toFixed(1) + '%';
+            if(document.getElementById('unitResult')) document.getElementById('unitResult').textContent = `Rp ${Math.round(profitPerUnit).toLocaleString('id')}`;
+
+            const insightEl = document.getElementById('aiInsight');
+            if (insightEl) {
+                if (margin < 15) {
+                    insightEl.textContent = `Margin laba bersih berada di bawah batas optimal (${margin.toFixed(1)}%). Direkomendasikan untuk meninjau kembali HPP produksi atau melakukan eskalasi harga jual.`;
+                } else {
+                    insightEl.textContent = `Indeks margin laba bersih dalam kondisi stabil (${margin.toFixed(1)}%). Struktur pembiayaan yang diterapkan telah sesuai dengan target pasar.`;
+                }
+            }
+        }
+
+        let liveRunning = false;
+        let liveInterval = null;
+        let liveData = { viewers: 0, cart: 0, orders: 0, revenue: 0 };
+
+        function toggleLive() {
+            const btn = document.getElementById('liveToggle');
+            if (!liveRunning) {
+                liveRunning = true;
+                btn.innerHTML = 'TERMINASI SESI TRANSMISI';
+                btn.className = 'bg-rose-950 text-white px-8 py-3 rounded-2xl font-black text-xs transition';
+                liveInterval = setInterval(() => {
+                    liveData.viewers += Math.floor(Math.random() * 10) + 1;
+                    if(Math.random() < 0.4) {
+                        liveData.orders += 1;
+                        liveData.revenue += 89500;
+                        const feed = document.getElementById('liveFeed');
+                        const logItem = document.createElement('div');
+                        logItem.className = 'p-2 bg-emerald-50 text-emerald-800 text-xs rounded-lg border border-emerald-100';
+                        logItem.textContent = `Konfirmasi Transaksi Sesi Live: Pembelian 1 unit Blouse Sutra Ruffle telah diverifikasi sistem.`;
+                        if(feed) feed.insertBefore(logItem, feed.firstChild);
+                    }
+                    document.getElementById('liveViewers').textContent = liveData.viewers;
+                    document.getElementById('liveOrders').textContent = liveData.orders;
+                    document.getElementById('liveRevenue').textContent = `Rp ${liveData.revenue.toLocaleString('id')}`;
+                }, 2500);
+            } else {
+                liveRunning = false;
+                clearInterval(liveInterval);
+                btn.innerHTML = 'INISIASI TRANSMISI SIARAN';
+                btn.className = 'bg-rose-500 text-white px-8 py-3 rounded-2xl font-black text-xs transition';
+            }
+        }
+
+        calculateDynamicPricingRealTime();
+        calculateProfit();
+    </script>
+</body>
+</html>
